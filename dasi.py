@@ -10,7 +10,10 @@ openai_api_key = os.getenv('OPENAI_API_KEY')
 discord_bot_token = os.getenv('DISCORD_BOT_TOKEN')
 
 intents = discord.Intents.default()
-intents.members = True
+intents.members = True  # enables member events including role updates
+intents.guilds = True   # enables guild events such as join/leave messages
+intents.messages = True # enables message events
+intents.dm_messages = True # enables direct message (DM) events
 
 client = discord.Client(intents=intents)
 
