@@ -21,8 +21,6 @@ faq_responses = {
     "🌼": "These are hidden collectibles found on the platform and mobile app that unlock rarity items."
 }
 
-conversation_history = {}
-
 # Define the function to handle the translate command
 async def handle_translate(message):
     # Remove the !translate prefix from the message to get the original text
@@ -72,7 +70,7 @@ async def handle_dasi(message):
 
 # Define the function to handle the faq command
 async def handle_faq(message):
-    # Remove the !FAQ prefix from the message to get the question
+    # Remove the !faq prefix from the message to get the question
     question = message.content[5:]
 
     # Check if the question is in the FAQ responses
@@ -83,23 +81,11 @@ async def handle_faq(message):
         # If the question is not in the FAQ responses, send a message indicating that the bot doesn't know the answer
         await message.channel.send("I'm sorry, I don't know the answer to that question.")
 
-# Define the function to handle the chat command
-async def handle_chat(message):
-    # Get the user's ID
-    user_id = message.author.id
-        
-    # Create a new conversation history for this user
-    conversation_history[user_id] = []
-        
-    # Send a welcome message
-    await message.channel.send("Hi there! I'm a chatbot. How can I assist you today?")
-
 # Use a dictionary to map each command to its corresponding handler function
 COMMAND_HANDLERS = {
     "!translate": handle_translate,
     "!dasi": handle_dasi,
-    "!faq": handle_faq,
-    "!chat": handle_chat
+    "!faq": handle_faq
 }
 
 intents = discord.Intents.default()
@@ -123,38 +109,7 @@ async def on_message(message):
             await COMMAND_HANDLERS[cmd](message)
             return
 
-    if message.author.id in conversation_history:
-        # Get the conversation history for this user
-        history = conversation_history[message.author.id]
-
-        # Add the user's message to the conversation history
-        history.append(message.content)
-
-        # Generate a response using OpenAI
-        response = openai.Completion.create(
-            engine="davinci",
-            prompt="\n".join(history),
-            temperature=0.5,
-            max_tokens=100,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0
-        )
-
-        # Extract the response text from the OpenAI response
-        response_text = response.choices[0].text.strip()
-
-        # Add the bot's response to the conversation history
-        history.append(response_text)
-
-        # Send the bot's response to the user
-        await message.channel.send(response_text)
-
-    elif message.content.startswith("!chat"):
-        conversation_history[message.author.id] = []
-        await message.channel.send("Let's start our conversation! Type something to get started.")
-
-    else:
-        await message.channel.send("I'm sorry, I didn't quite understand what you meant. Type !chat to initiate a conversation.")
+    # If the message does not match any known commands, send a default response
+    await message.channel.send("I'm sorry, I didn't quite understand what you meant. Type !faq, !translate, or !dasi to get started.")
 
 client.run(os.getenv("DISCORD_BOT_TOKEN"))
