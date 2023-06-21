@@ -99,7 +99,7 @@ async def on_message(message):
             # If the question is not in the FAQ responses, send a message indicating that the bot doesn't know the answer
             await message.channel.send("I'm sorry, I don't know the answer to that question.")
         
-    if message.content.startswith("!chat"):
+    if message.content == "!chat":
         # Get the user's ID
         user_id = message.author.id
         
@@ -108,8 +108,7 @@ async def on_message(message):
         
         # Send a welcome message
         await message.channel.send("Hi there! I'm a chatbot. How can I assist you today?")
-
-    # Check if the user has an active conversation
+    
     elif message.author.id in conversation_history:
         # Get the conversation history for this user
         history = conversation_history[message.author.id]
