@@ -48,8 +48,8 @@ async def handle_translate(message):
 
 # Define the function to handle the dasi command
 async def handle_dasi(message):
-    # Remove the "/dasi" prefix from the message to get the query
-    query = message.content[6:]
+    # Remove the "!dasi" prefix from the message to get the query
+    query = message.content[5:]
 
     # Use OpenAI to generate a response to the query
     response = openai.Completion.create(
@@ -70,7 +70,7 @@ async def handle_dasi(message):
 
 # Define the function to handle the faq command
 async def handle_faq(message):
-    # Remove the !faq prefix from the message to get the question
+    # Remove the "!faq" prefix from the message to get the question
     question = message.content[5:]
 
     # Check if the question is in the FAQ responses
