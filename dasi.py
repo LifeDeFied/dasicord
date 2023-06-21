@@ -98,6 +98,48 @@ async def on_message(message):
         else:
             # If the question is not in the FAQ responses, send a message indicating that the bot doesn't know the answer
             await message.channel.send("I'm sorry, I don't know the answer to that question.")
+        
+    if message.content.startswith("!chat"):
+        # Get the user's ID
+        user_id = message.author.id
+        
+        # Create a new conversation history for this user
+        conversation_history[user_id] = []
+        
+        # Send a welcome message
+        await message.channel.send("Hi there! I'm a chatbot. How can I assist you today?")
+
+    # Check if the user has an active conversation
+    elif message.author.id in conversation_history:
+        # Get the conversation history for this user
+        history = conversation_history[message.author.id]
+        
+        # Add the user's message to the conversation history
+        history.append(message.content)
+        
+        # Generate a response using OpenAI
+        response = openai.Completion.create(
+            engine="davinci",
+            prompt="\n".join(history),
+            temperature=0.5,
+            max_tokens=100,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
+        
+        # Extract the response text from the OpenAI response
+        response_text = response.choices[0].text.strip()
+        
+        # Add the bot's response to the conversation history
+        history.append(response_text)
+        
+        # Send the bot's response to the user
+        await message.channel.send(response_text)
+
+    # If the user doesn't have an active conversation, send a message indicating that the conversation hasn't started yet
+    else:
+        await message.channel.send("I'm sorry, we haven't started a conversation yet. Please type !chat to begin.")
 
 # Run the Discord bot with the token from the environment variables
 client.run(os.getenv("DISCORD_BOT_TOKEN"))
