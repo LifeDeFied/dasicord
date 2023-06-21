@@ -113,13 +113,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     
-    for command, handler in COMMAND_HANDLERS.items():
-        if message.content.startswith(command):
-            await handler(message)
-            return
-
-    # Check if the user has an active conversation
-    elif message.author.id in conversation_history:
+    if message.author.id in conversation_history:
         # Get the conversation history for this user
         history = conversation_history[message.author.id]
         
@@ -146,8 +140,12 @@ async def on_message(message):
         # Send the bot's response to the user
         await message.channel.send(response_text)
 
-    # If the user doesn't have an active conversation, send a message indicating that the conversation hasn't started yet
+    elif message.content.startswith("!chat"):
+        conversation_history[message.author.id] = []
+        await message.channel.send("Let's start our conversation! Type something to get started.")
+
     else:
-        await message.channel.send("I'm sorry, we haven't started a conversation yet. Please type !chat to begin.")
+        await message.channel.send("I'm sorry, I didn't quite understand what you meant. Type !chat to initiate a conversation.")
+
 
 client.run(os.getenv("DISCORD_BOT_TOKEN"))
