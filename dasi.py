@@ -31,8 +31,6 @@ faq_responses = {
     "🌼": "These are hidden collectibles found on the platform and mobile app that unlock rarity items." 
 }
 
-conversation_history = {}
-
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user.name}")
@@ -99,12 +97,5 @@ async def on_message(message):
             # If the question is not in the FAQ responses, send a message indicating that the bot doesn't know the answer
             await message.channel.send("I'm sorry, I don't know the answer to that question.")
         
-        # Send the bot's response to the user
-        await message.channel.send(response_text)
-
-    # If the user doesn't have an active conversation, send a message indicating that the conversation hasn't started yet
-    else:
-        await message.channel.send("I'm sorry, we haven't started a conversation yet. Please type !chat to begin.")
-
 # Run the Discord bot with the token from the environment variables
 client.run(os.getenv("DISCORD_BOT_TOKEN"))
