@@ -102,7 +102,10 @@ COMMAND_HANDLERS = {
     "!chat": handle_chat
 }
 
-client = discord.Client()
+intents = discord.Intents.default()
+intents.members = True
+
+client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
