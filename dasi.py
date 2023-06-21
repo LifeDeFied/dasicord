@@ -9,7 +9,12 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 discord_bot_token = os.getenv('DISCORD_BOT_TOKEN')
 
-client = discord.Client()
+#Define the intents that your will use
+intents = discord.Intents.default()
+intents.members = True
+
+# Create a new client with the specified intents
+client = discord.Client(intents=intents)
 
 # Set up OpenAI credentials
 openai.api_key = os.getenv("OPENAI_API_KEY")
