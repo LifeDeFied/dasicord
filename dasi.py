@@ -18,7 +18,7 @@ faq_responses = {
     "Is LifeDeFied secure?": "Yes, LifeDeFied is highly secure and uses advanced cryptographic techniques to protect data and transactions on the blockchain.",
     "Can LifeDeFied be used for personal as well as business purposes?": "Yes, LifeDeFied is designed to meet the needs of both individuals and businesses, and provides advanced security solutions for a wide range of use cases.",
     "What sets LifeDeFied apart from other blockchain security platforms?": "LifeDeFied stands out from other blockchain security platforms due to its advanced cryptographic techniques, user-friendly interface, and commitment to providing exceptional customer support.",
-    "🌼": "These are hidden collectibles found on the platform and mobile app that unlock rarity items." 
+    "🌼": "These are hidden collectibles found on the platform and mobile app that unlock rarity items."
 }
 
 conversation_history = {}
@@ -116,13 +116,20 @@ async def on_message(message):
     if message.author == client.user:
         return
     
+    # Check if the message starts with a valid command
+    for cmd in COMMAND_HANDLERS:
+        if message.content.startswith(cmd):
+            # Call the appropriate handler function for the command
+            await COMMAND_HANDLERS[cmd](message)
+            return
+
     if message.author.id in conversation_history:
         # Get the conversation history for this user
         history = conversation_history[message.author.id]
-        
+
         # Add the user's message to the conversation history
         history.append(message.content)
-        
+
         # Generate a response using OpenAI
         response = openai.Completion.create(
             engine="davinci",
@@ -133,13 +140,13 @@ async def on_message(message):
             frequency_penalty=0,
             presence_penalty=0
         )
-        
+
         # Extract the response text from the OpenAI response
         response_text = response.choices[0].text.strip()
-        
+
         # Add the bot's response to the conversation history
         history.append(response_text)
-        
+
         # Send the bot's response to the user
         await message.channel.send(response_text)
 
@@ -149,6 +156,5 @@ async def on_message(message):
 
     else:
         await message.channel.send("I'm sorry, I didn't quite understand what you meant. Type !chat to initiate a conversation.")
-
 
 client.run(os.getenv("DISCORD_BOT_TOKEN"))
