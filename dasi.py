@@ -9,16 +9,6 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 discord_bot_token = os.getenv('DISCORD_BOT_TOKEN')
 
-#Define the intents that your will use
-intents = discord.Intents.default()
-intents.members = True
-
-# Create a new client with the specified intents
-client = discord.Client(intents=intents)
-
-# Set up OpenAI credentials
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
 # Define the FAQ responses
 faq_responses = {
     "What is LifeDeFied?": "LifeDeFied is a blockchain-based platform that provides advanced security solutions for individuals and businesses.",
@@ -33,6 +23,87 @@ faq_responses = {
 
 conversation_history = {}
 
+# Define the function to handle the translate command
+async def handle_translate(message):
+    # Remove the !translate prefix from the message to get the original text
+    text = message.content[10:]
+
+    # Detect the language of the input text
+    input_lang = detect(text)
+
+    # Use OpenAI to generate a translated response
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt="Translate from {} to English: {}".format(input_lang, text),
+        temperature=0.3,
+        max_tokens=100,
+        top_p=1.0,
+        frequency_penalty=0.0,
+        presence_penalty=0.0
+    )
+
+    # Extract the translated text from the OpenAI response
+    translated_text = response.choices[0].text.strip()
+
+    # Send the translated text back to the channel as a message from the bot
+    await message.channel.send(translated_text)
+
+# Define the function to handle the dasi command
+async def handle_dasi(message):
+    # Remove the "/dasi" prefix from the message to get the query
+    query = message.content[6:]
+
+    # Use OpenAI to generate a response to the query
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=query,
+        temperature=0.3,
+        max_tokens=100,
+        top_p=1.0,
+        frequency_penalty=0.0,
+        presence_penalty=0.0
+    )
+
+    # Extract the response text from the OpenAI response
+    dasi_response = response.choices[0].text.strip()
+
+    # Send the Dasi response back to the channel as a message from the bot
+    await message.channel.send(dasi_response)
+
+# Define the function to handle the faq command
+async def handle_faq(message):
+    # Remove the !FAQ prefix from the message to get the question
+    question = message.content[5:]
+
+    # Check if the question is in the FAQ responses
+    if question in faq_responses:
+        # Send the FAQ response back to the channel as a message from the bot
+        await message.channel.send(faq_responses[question])
+    else:
+        # If the question is not in the FAQ responses, send a message indicating that the bot doesn't know the answer
+        await message.channel.send("I'm sorry, I don't know the answer to that question.")
+
+# Define the function to handle the chat command
+async def handle_chat(message):
+    # Get the user's ID
+    user_id = message.author.id
+        
+    # Create a new conversation history for this user
+    conversation_history[user_id] = []
+        
+    # Send a welcome message
+    await message.channel.send("Hi there! I'm a chatbot. How can I assist you today?")
+
+# Use a dictionary to map each command to its corresponding handler function
+COMMAND_HANDLERS = {
+    "!translate": handle_translate,
+    "!dasi": handle_dasi,
+    "!faq": handle_faq,
+    "!chat": handle_chat
+}
+
+client = discord.Client()
+
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user.name}")
@@ -42,73 +113,12 @@ async def on_message(message):
     if message.author == client.user:
         return
     
-    if message.content.startswith("!translate"):
-        # Remove the !translate prefix from the message to get the original text
-        text = message.content[10:]
-        
-        # Detect the language of the input text
-        input_lang = detect(text)
-        
-        # Use OpenAI to generate a translated response
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt="Translate from {} to English: {}".format(input_lang, text),
-            temperature=0.3,
-            max_tokens=100,
-            top_p=1.0,
-            frequency_penalty=0.0,
-            presence_penalty=0.0
-        )
-        
-        # Extract the translated text from the OpenAI response
-        translated_text = response.choices[0].text.strip()
-        
-        # Send the translated text back to the channel as a message from the bot
-        await message.channel.send(translated_text)
+    for command, handler in COMMAND_HANDLERS.items():
+        if message.content.startswith(command):
+            await handler(message)
+            return
 
-    if message.content.startswith("!dasi"):
-        # Remove the "/dasi" prefix from the message to get the query
-        query = message.content[6:]
-        
-        # Use OpenAI to generate a response to the query
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=query,
-            temperature=0.3,
-            max_tokens=100,
-            top_p=1.0,
-            frequency_penalty=0.0,
-            presence_penalty=0.0
-        )
-        
-        # Extract the response text from the OpenAI response
-        dasi_response = response.choices[0].text.strip()
-        
-        # Send the Dasi response back to the channel as a message from the bot
-        await message.channel.send(dasi_response)
-
-    if message.content.startswith("!faq"):
-        # Remove the !FAQ prefix from the message to get the question
-        question = message.content[5:]
-        
-        # Check if the question is in the FAQ responses
-        if question in faq_responses:
-            # Send the FAQ response back to the channel as a message from the bot
-            await message.channel.send(faq_responses[question])
-        else:
-            # If the question is not in the FAQ responses, send a message indicating that the bot doesn't know the answer
-            await message.channel.send("I'm sorry, I don't know the answer to that question.")
-        
-    if message.content == "!chat":
-        # Get the user's ID
-        user_id = message.author.id
-        
-        # Create a new conversation history for this user
-        conversation_history[user_id] = []
-        
-        # Send a welcome message
-        await message.channel.send("Hi there! I'm a chatbot. How can I assist you today?")
-    
+    # Check if the user has an active conversation
     elif message.author.id in conversation_history:
         # Get the conversation history for this user
         history = conversation_history[message.author.id]
@@ -140,5 +150,4 @@ async def on_message(message):
     else:
         await message.channel.send("I'm sorry, we haven't started a conversation yet. Please type !chat to begin.")
 
-# Run the Discord bot with the token from the environment variables
 client.run(os.getenv("DISCORD_BOT_TOKEN"))
