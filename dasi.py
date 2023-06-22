@@ -9,14 +9,10 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 discord_bot_token = os.getenv('DISCORD_BOT_TOKEN')
 
-# Define default intents
-default_intents = discord.Intents.default()
+intents = discord.Intents.default()
+intents.members = True
 
-# Set your custom intents (optional)
-custom_intents = discord.Intents(messages=True, guilds=False)
-
-# Initialize the client with either the default or custom intents
-client = discord.Client(intents=custom_intents or default_intents)
+client = discord.Client(intents=intents)
 
 # Set up OpenAI credentials
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -42,9 +38,9 @@ async def on_message(message):
     if message.author == client.user:
         return
     
-    if message.content.startswith("!translate"):
-        # Remove the !translate prefix from the message to get the original text
-        text = message.content[10:]
+    if message.content.startswith("DASI translate"):
+        # Remove the "DASI translate" prefix from the message to get the original text
+        text = message.content[14:]
         
         # Detect the language of the input text
         input_lang = detect(text)
@@ -66,9 +62,9 @@ async def on_message(message):
         # Send the translated text back to the channel as a message from the bot
         await message.channel.send(translated_text)
 
-    if message.content.startswith("!dasi"):
-        # Remove the "/dasi" prefix from the message to get the query
-        query = message.content[6:]
+    if message.content.startswith("DASI"):
+        # Remove the "DASI" prefix from the message to get the query
+        query = message.content[5:]
         
         # Use OpenAI to generate a response to the query
         response = openai.Completion.create(
@@ -87,9 +83,9 @@ async def on_message(message):
         # Send the Dasi response back to the channel as a message from the bot
         await message.channel.send(dasi_response)
 
-    if message.content.startswith("!faq"):
-        # Remove the !FAQ prefix from the message to get the question
-        question = message.content[5:]
+    if message.content.startswith("DASI faq"):
+        # Remove the "DASI faq" prefix from the message to get the question
+        question = message.content[9:]
         
         # Check if the question is in the FAQ responses
         if question in faq_responses:
