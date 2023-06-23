@@ -9,7 +9,7 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 discord_bot_token = os.getenv('DISCORD_BOT_TOKEN')
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
 # Set up OpenAI credentials
@@ -59,7 +59,7 @@ async def on_message(message):
         # Send the translated text back to the channel as a message from the bot
         await message.channel.send(translated_text)
     
-    if message.content.startswith("!FAQ"):
+    if message.content.startswith("!faq"):
         # Remove the !FAQ prefix from the message to get the question
         question = message.content[5:]
         
