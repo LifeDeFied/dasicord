@@ -59,6 +59,27 @@ async def on_message(message):
         # Send the translated text back to the channel as a message from the bot
         await message.channel.send(translated_text)
     
+    if message.content.startswith("!dasi"):
+        # Remove the "!dasi" prefix from the message to get the query
+        query = message.content[6:]
+        
+        # Use OpenAI to generate a response to the query
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=query,
+            temperature=0.3,
+            max_tokens=100,
+            top_p=1.0,
+            frequency_penalty=0.0,
+            presence_penalty=0.0
+        )
+        
+        # Extract the response text from the OpenAI response
+        dasi_response = response.choices[0].text.strip()
+        
+        # Send the Dasi response back to the channel as a message from the bot
+        await message.channel.send(dasi_response)
+    
     if message.content.startswith("!faq"):
         # Remove the !FAQ prefix from the message to get the question
         question = message.content[5:]
