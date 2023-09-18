@@ -59,7 +59,7 @@ async def on_message(message):
         # Send the translated text back to the channel as a message from the bot
         await message.channel.send(translated_text)
     
-    if message.content.startswith("!dasi"):
+    if message.content.startswith("!chat"):
         # Remove the "!dasi" prefix from the message to get the query
         query = message.content[6:]
         
